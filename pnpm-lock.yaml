@@ -1,0 +1,45 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+  .:
+    dependencies:
+      openai:
+        specifier: ^6.38.0
+        version: 6.38.0
+    devDependencies:
+      prettier:
+        specifier: ^3.8.3
+        version: 3.8.3
+
+packages:
+  openai@6.38.0:
+    resolution:
+      {
+        integrity: sha512-AoMplt2UalrpgUDMh3L09QWjNRlgJPipclQvA6sYAaeF6nHNBMgmikAZGmcYLn8on4d9sQY9Q8bOLfrBS7Lc8g==,
+      }
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
+  prettier@3.8.3:
+    resolution:
+      {
+        integrity: sha512-7igPTM53cGHMW8xWuVTydi2KO233VFiTNyF5hLJqpilHfmn8C8gPf+PS7dUT64YcXFbiMGZxS9pCSxL/Dxm/Jw==,
+      }
+    engines: { node: '>=14' }
+    hasBin: true
+
+snapshots:
+  openai@6.38.0: {}
+
+  prettier@3.8.3: {}
