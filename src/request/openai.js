@@ -2,11 +2,12 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import OpenAI from 'openai';
 import { getCurrentTerminalDir, getUserHomeDir } from '../utils/pathUtils.js';
-
-export const OPENAI_MODEL = 'gpt-5.5';
-const DEFAULT_OPENAI_BASE_URL = 'https://api.openai.com/v1';
-const SETTINGS_DIR_NAME = '.front-code';
-const SETTINGS_FILE_NAME = 'settings.json';
+import {
+  FRONT_CODE_DIR_NAME,
+  SETTINGS_FILE_NAME,
+  OPENAI_MODEL,
+  DEFAULT_OPENAI_BASE_URL,
+} from '../constants/fileName.js';
 
 const SYSTEM_PROMPT =
   'You are Front Code, an AI terminal coding assistant. Reply in Chinese unless the user asks for another language.';
@@ -18,7 +19,7 @@ const SYSTEM_PROMPT =
  * @returns {string} Absolute settings file path.
  */
 function getSettingsFilePath(baseDir) {
-  return path.join(baseDir, SETTINGS_DIR_NAME, SETTINGS_FILE_NAME);
+  return path.join(baseDir, FRONT_CODE_DIR_NAME, SETTINGS_FILE_NAME);
 }
 
 /**

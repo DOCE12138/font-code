@@ -1,12 +1,13 @@
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import ora from 'ora';
+import { OPENAI_MODEL, SESSION_VERSION } from './constants/fileName.js';
 import {
-  OPENAI_MODEL,
   createAssistantResponse,
   createOpenAIClient,
   formatOpenAIError,
 } from './request/openai.js';
+import { writeProjectSessionJson } from './utils/fsHandle.js';
 import {
   assistantMarkdown,
   info,
@@ -68,6 +69,70 @@ function printAssistantMessage(message) {
 }
 
 /**
+ * Create the initial chat session state.
+ *
+ * No parameters.
+ *
+ * @returns {object} Initial chat session state.
+ */
+function createInitialSession() {
+  const now = new Date().toISOString();
+
+  return {
+    version: SESSION_VERSION,
+    model: OPENAI_MODEL,
+    startedAt: now,
+    updatedAt: now,
+    previousResponseId: null,
+    messages: [],
+  };
+}
+
+/**
+ * Add one successful chat turn to the session state.
+ *
+ * @param {object} session - Current chat session state.
+ * @param {string} userMessage - User message content.
+ * @param {{id: string, text: string}} assistantResponse - Assistant response data.
+ * @returns {object} Updated chat session state.
+ */
+function appendSessionTurn(session, userMessage, assistantResponse) {
+  const now = new Date().toISOString();
+
+  session.updatedAt = now;
+  session.previousResponseId = assistantResponse.id;
+  session.messages.push(
+    {
+      role: 'user',
+      content: userMessage,
+      createdAt: now,
+    },
+    {
+      role: 'assistant',
+      content: assistantResponse.text,
+      responseId: assistantResponse.id,
+      createdAt: now,
+    },
+  );
+
+  return session;
+}
+
+/**
+ * Persist chat session state to the current project's session file.
+ *
+ * @param {object} session - Chat session state to persist.
+ * @returns {Promise<void>} Resolves when the session write attempt is complete.
+ */
+async function persistSession(session) {
+  try {
+    await writeProjectSessionJson(session);
+  } catch (error) {
+    warn('Session save failed: ' + (error?.message || String(error)));
+  }
+}
+
+/**
  * Read one user message from the terminal.
  *
  * @param {readline.Interface} rl - Readline interface used to ask terminal input.
@@ -95,6 +160,7 @@ async function readUserMessage(rl) {
 async function main() {
   const rl = readline.createInterface({ input, output });
   const client = createOpenAIClient();
+  const session = createInitialSession();
   let previousResponseId = null;
 
   showWelcome();
@@ -153,6 +219,8 @@ async function main() {
 
       spinner.stop();
       previousResponseId = response.id;
+      appendSessionTurn(session, message, response);
+      await persistSession(session);
       printAssistantMessage(response.text);
     } catch (error) {
       spinner.stop();
